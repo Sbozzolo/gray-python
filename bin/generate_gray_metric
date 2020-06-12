@@ -1,0 +1,183 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""Generate kernel for GRay given arbitrary metric (in Cartesian coordinates).
+
+g is covariant (g_{\alpha\beta})
+u is contravariant
+
+The convention is that contravariant objects have UP in their name
+
+The equation is
+
+d uUPmu / d lambda = - (gUP^mu beta uUP alpha - 1/2 gUP^mu alpha uUP^beta) *
+                       g_beta gamma, alpha uUPgamma
+
+We call Upsilon_beta alpha := g_beta gamma, alpha uUPgamma
+and XiUP^mu beta alpha = (gUP^mu beta uUP alpha - 1/2 gUP^mu alpha uUP^beta)
+
+
+We perform heavy common sub-expression elimination.
+
+"""
+
+from gray.generate_metric import metric_from_tuple
+from gray.codegen import apply_cse_and_assign_symbols
+from gray.codegen import assign_matrix
+from gray.codegen import check_for_new_symbols_and_print_gray_code
+from gray.generate_metric import generate_geodesic_clcode
+import argparse
+import importlib.util  # Used to load in runtime the function metric()
+from importlib.resources import read_text  # Used to load templates
+import os.path
+from sympy import symbols, derive_by_array, inv_quick
+from string import Template
+
+desc = """Generate a metric file for GRay2.
+
+The input file has to be a valid Python3 file and has to defined a function
+metric(). This function has to return a tuple with the 16 elements of the
+metric. The most simple example is:
+
+def metric():
+    return (-1, 0, 0, 0,
+             0, 1, 0, 0,
+             0, 0, 1, 0,
+             0, 0, 0, 1)
+
+If the metric is function of t, x, y, z, you have to define those symbols.
+To do this, you have to import sympy.symbols, and add the following line
+somewhere in your file
+
+t, x, y, z = symbols('t, x, y, z', real=True)
+
+An example of more complete file would be:
+
+from sympy import symbols
+t, x, y, z = symbols('t, x, y, z', real=True)
+
+
+def metric():
+    return (-t + x + y, 0, 0, 0, 0, x + y, 0, 0, 0, 0, y, 0, 0, 0, 0, z)
+
+
+This file will be loaded in %(prog)s. You can write much more complicated
+files, but at the end, there must be a metric() function. You have to use
+sympy's function for mathematical functions, for example, if you need the
+square root, metric() has to import sqrt from sympy.
+
+The file gray_metrics.py contains some examples.
+
+You can define GRay2 run-time parameters in the metric by defining additional
+sympy symbols. For example, if your metric has a parameter "a", such as
+
+def metric():
+    a = sympy.symbols('a', real=True)
+    return (-t * a, 0, 0, 0, 0, x, 0, 0, 0, 0, y, 0, 0, 0, 0, z)
+
+then, you have to modify the source code of GRay so that this parameter can be
+provided as command-line argument. %(prog)s will tell you what code has to be
+added to GRay and where. You have to recompile GRay for the modifications to
+take effect. Note, unless you change the suggested code, the default value for
+any new parameter is 0, so you have to provide the value when you call gray.
+For example, if the parameter is named 'a', and you want to give it the value
+0.5, you will have to call gray as
+
+gray a=0.5
+
+%(prog)s can manipulate equations at four possible levels. The difference among
+the levels is how much sympy does versus how much is left for GRay. At level 1,
+%(prog)s tries to do all the possible manipulations and return one single
+expression for the right-hand-sides of the geodesic equation. On the other hand
+of the spectrum, at level 5, %(prog)s provides the expressions for the inverse
+and the derivatives of the metric, everything else is computed by GRay using
+matrix operations. At level 6, the most minimal common sub-expression
+elimination is performed, instead expressions are simplified.
+
+At levels 7 and 9, Christofell symbols are used.
+
+"""
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter, description=desc)
+    parser.add_argument('-o',
+                        '--output-file',
+                        required=True,
+                        type=argparse.FileType('w'),
+                        help='Name of the file where write the output. \
+                        If the file does not exist, it will be created. \
+                        If the file exists, it will be overwritten')
+    parser.add_argument('-i',
+                        '--input-file',
+                        type=str,
+                        required=True,
+                        help='Name of the file where to read the metric. \
+                        The file has to be a valid Python3 file with \
+                        a function metric(). See description of %(prog)s')
+    parser.add_argument('--level',
+                        choices=[1, 2, 3, 4, 5, 6, 7, 8, 9],
+                        default=1,
+                        metavar='1-9',
+                        type=int,
+                        help='What level to use? \
+                              1: Compute directly the RHS \
+                              2: Compute Lambda  \
+                              3: Compute Xi \
+                              4: Compute Upsilon \
+                              5: Compute Phi \
+                              6: Compute simplified Phi \
+                              7: Compute Christoffel symbols, reduce to RHS \
+                              8: Compute Christoffel symbols \
+                              9: Compute simplified Christoffel symbols\
+                              (default: %(default)s)')
+    parser.add_argument('--ks-test',
+                        action='store_true',
+                        help='Add comparison with hard-coded Kerr-Schild')
+
+    args = parser.parse_args()
+
+    if (not os.path.exists(args.input_file)):
+        raise RuntimeError("File {} does not exist".format(args.input_file))
+
+    # Coordinates
+    t, x, y, z = symbols('t, x, y, z', real=True)
+    # 4-velocity (contravariant)
+    uUP = symbols('uUPt, uUPx, uUPy, uUPz', real=True)
+
+    # Load the user-provided module which contains the function metric
+    spec = importlib.util.spec_from_file_location("metric", args.input_file)
+    metric_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(metric_module)
+
+    # Metric, the function metric() returns a tuple. Here we convert it to a
+    # sympy Matrix
+    g = metric_from_tuple(metric_module.metric())
+
+    # Compute the derivative
+    # Keep in mind: the first index is the derivative index
+    g_deriv = derive_by_array(g, [t, x, y, z])
+
+    # For the computation of usquared
+    g_u2, cse_symbols_g = apply_cse_and_assign_symbols(g)
+    gees = assign_matrix('g', g_u2[0])
+
+    # Compute the inverse of the metric
+    gUP = inv_quick(g)
+
+    # Core of the program: here it is where the magic happens. The variable
+    # clcode contains the code that has to be insert in the template.
+    clcode = generate_geodesic_clcode(g_deriv, gUP, uUP, args.level)
+
+    # Optionally add test to check Kerr-Schild with original implemntation
+    test_gray2 = read_text('gray.etc', 'diff_ks.cl') if args.ks_test else ""
+
+    # Read the template for GRay2 kernel
+    template_cl = Template(read_text('gray.etc', 'template_geodesic.cl'))
+
+    # Write output file
+    args.output_file.write(template_cl.substitute(locals()))
+
+    # If there are additional parameters, print the code that has to be
+    # added to GRay to use those parameters at runtime
+    check_for_new_symbols_and_print_gray_code(metric_module.metric())
