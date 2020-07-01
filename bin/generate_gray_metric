@@ -97,43 +97,44 @@ At levels 7 and 9, Christofell symbols are used.
 
 """
 
-if __name__ == "__main__":
+parser = argparse.ArgumentParser(
+    formatter_class=argparse.RawDescriptionHelpFormatter, description=desc)
+parser.add_argument('-o',
+                    '--output-file',
+                    required=True,
+                    type=argparse.FileType('w'),
+                    help='Name of the file where write the output. \
+                    If the file does not exist, it will be created. \
+                    If the file exists, it will be overwritten')
+parser.add_argument('-i',
+                    '--input-file',
+                    type=str,
+                    required=True,
+                    help='Name of the file where to read the metric. \
+                    The file has to be a valid Python3 file with \
+                    a function metric(). See description of %(prog)s')
+parser.add_argument('--level',
+                    choices=[1, 2, 3, 4, 5, 6, 7, 8, 9],
+                    default=1,
+                    metavar='1-9',
+                    type=int,
+                    help='What level to use? \
+                          1: Compute directly the RHS \
+                          2: Compute Lambda  \
+                          3: Compute Xi \
+                          4: Compute Upsilon \
+                          5: Compute Phi \
+                          6: Compute simplified Phi \
+                          7: Compute Christoffel symbols, reduce to RHS \
+                          8: Compute Christoffel symbols \
+                          9: Compute simplified Christoffel symbols\
+                          (default: %(default)s)')
+parser.add_argument('--ks-test',
+                    action='store_true',
+                    help='Add comparison with hard-coded Kerr-Schild')
 
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawDescriptionHelpFormatter, description=desc)
-    parser.add_argument('-o',
-                        '--output-file',
-                        required=True,
-                        type=argparse.FileType('w'),
-                        help='Name of the file where write the output. \
-                        If the file does not exist, it will be created. \
-                        If the file exists, it will be overwritten')
-    parser.add_argument('-i',
-                        '--input-file',
-                        type=str,
-                        required=True,
-                        help='Name of the file where to read the metric. \
-                        The file has to be a valid Python3 file with \
-                        a function metric(). See description of %(prog)s')
-    parser.add_argument('--level',
-                        choices=[1, 2, 3, 4, 5, 6, 7, 8, 9],
-                        default=1,
-                        metavar='1-9',
-                        type=int,
-                        help='What level to use? \
-                              1: Compute directly the RHS \
-                              2: Compute Lambda  \
-                              3: Compute Xi \
-                              4: Compute Upsilon \
-                              5: Compute Phi \
-                              6: Compute simplified Phi \
-                              7: Compute Christoffel symbols, reduce to RHS \
-                              8: Compute Christoffel symbols \
-                              9: Compute simplified Christoffel symbols\
-                              (default: %(default)s)')
-    parser.add_argument('--ks-test',
-                        action='store_true',
-                        help='Add comparison with hard-coded Kerr-Schild')
+
+if __name__ == "__main__":
 
     args = parser.parse_args()
 

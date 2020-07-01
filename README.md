@@ -1,10 +1,9 @@
 ![GRay-python-logo](gray-python.png)
 
-# GRay-python (pre and post-processing)
-
 ![Tests](https://github.com/Sbozzolo/gray-python/workflows/Tests/badge.svg)
 [![codecov](https://codecov.io/gh/Sbozzolo/gray-python/branch/master/graph/badge.svg?token=P8JZQHJWPC)](https://codecov.io/gh/Sbozzolo/gray-python)
-[![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
+[![GPLv3
+license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
 
 [GRay2](https://github.com/luxsrc/gray) is a general-relativistic
 ray-tracing/radiation-transfer code based on the
@@ -14,8 +13,8 @@ of the underlying hardware architecture, which results in the unparalleled
 performance.
 
 ``GRay-python`` is a set of companion tools for Gray2. This package provides
-modules to prepare GRay2 simulations and to analyze them. The documentation
-for ``GRay-Python`` can be found 
+modules to prepare GRay2 simulations and to analyze them. The documentation for
+``GRay-Python`` can be found [here](https://sbozzolo.github.io/gray-python).
 
 ## Tests
 
