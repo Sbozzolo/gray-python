@@ -34,9 +34,9 @@ real4 matrix_vector_product(real16 a, real4 b){
   dot(a.scdef, b)};
 };
 
-inline real4
-getcons(real4 q, /**< Spacetime event "location" */
-        real4 u) /**< The vector being squared   */
+static real4
+diagnostic(real4 q, /**< Spacetime event "location" */
+           real4 u) /**< The vector being squared   */
 {
   real t = q.s0;
   real x = q.s1;
@@ -54,7 +54,7 @@ getcons(real4 q, /**< Spacetime event "location" */
   K(0.0), K(0.0)};
 }
 
-inline real8
+static real8
 icond(real r_obs, /**< Distance of the observer from the black hole */
       real i_obs, /**< Inclination angle of the observer in degrees */
       real j_obs, /**< Azimuthal   angle of the observer in degrees */
@@ -77,7 +77,7 @@ icond(real r_obs, /**< Distance of the observer from the black hole */
   return (real8){q, u};
 }
 
-inline real8
+static real8
 rhs(real8 s) /**< State of the ray */
 {
   real4 q = s.s0123;

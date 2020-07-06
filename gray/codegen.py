@@ -97,12 +97,8 @@ def check_for_new_symbols_and_print_gray_code(metric):
     new_symbols = False
     known_symbols = set(symbols('t, x, y, z', real=True))
 
-    # File gray.c
-    grayc_code = ""
-    # File gray.h
-    grayh_code = ""
-    # File conf.c
-    confc_code = ""
+    # File param.opts
+    param_code = ""
 
     # Note that .free_symbols only returns free symbols. For example, for
     # Sum(T, (n, 1, N))/N it returns {N, T}, but not n. This is what we want.
@@ -118,19 +114,11 @@ def check_for_new_symbols_and_print_gray_code(metric):
     for s in unkown_symbols:
         new_symbols = True
         str_s = str(s)
-        confc_code += f"PARA({str_s}, {str_s}) = atof(val);\n"
-        grayc_code += f"gray->{str_s} = 0;\n"
-        grayh_code += f"double {str_s};\n"
+        param_code += f"double {str_s}:{str_s} = strtod(val, &rem);\n"
 
     if (new_symbols):
-        print("Additional code in conf.c. Add after comment ADDITIONAL CODE")
-        print(confc_code)
-        print("")
-        print("Additional code in gray.c. Add after comment ADDITIONAL CODE")
-        print(grayc_code)
-        print("")
-        print("Additional code in gray.h. Add after comment ADDITIONAL CODE")
-        print(grayh_code)
+        print("Additional code in param.opts:")
+        print(param_code)
 
     return (new_symbols)
 
