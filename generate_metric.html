@@ -1,0 +1,277 @@
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Geodesic integration in a given spacetime &#8212; GRay-python 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Overview" href="index.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="index.html" title="Overview"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">GRay-python 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/gray-python.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Geodesic integration in a given spacetime</a><ul>
+<li><a class="reference internal" href="#generate-gray-metric">generate_gray_metric</a><ul>
+<li><a class="reference internal" href="#input-file-and-metric-function">Input file and metric() function</a></li>
+<li><a class="reference internal" href="#the-concept-of-levels">The concept of <em>levels</em></a></li>
+<li><a class="reference internal" href="#what-level-should-i-choose">What level should I choose?</a></li>
+<li><a class="reference internal" href="#command-line-arguments">Command-line arguments</a><ul>
+<li><a class="reference internal" href="#Named Arguments">Named Arguments</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Overview</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="geodesic-integration-in-a-given-spacetime">
+<h1>Geodesic integration in a given spacetime<a class="headerlink" href="#geodesic-integration-in-a-given-spacetime" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">GRay-python</span></code> has a module, <code class="docutils literal notranslate"><span class="pre">gray.generate_metric</span></code>, to produce OpenCL
+kernels that GRay2 can use to perform geodesic integration in any given
+spacetime. This page describes how to use this functionality.</p>
+<div class="section" id="generate-gray-metric">
+<h2>generate_gray_metric<a class="headerlink" href="#generate-gray-metric" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">GRay-python</span></code> comes with a command-line tool <code class="docutils literal notranslate"><span class="pre">generate_gray_metric</span></code>. This
+executable takes as input a Python file and returns an OpenCL kernel ready to be
+used in GRay2.</p>
+<div class="section" id="input-file-and-metric-function">
+<h3>Input file and metric() function<a class="headerlink" href="#input-file-and-metric-function" title="Permalink to this headline">¶</a></h3>
+<p>The input file has to be a valid Python3 code that defines a function
+<code class="docutils literal notranslate"><span class="pre">metric()</span></code>. This function must take no arguments and must return a tuple with
+the elements of the metric. The return value will probably look like:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="p">(</span><span class="n">g_tt</span><span class="p">,</span> <span class="n">g_tx</span><span class="p">,</span> <span class="n">g_ty</span><span class="p">,</span> <span class="n">g_tz</span><span class="p">,</span>
+        <span class="n">g_xt</span><span class="p">,</span> <span class="n">g_xx</span><span class="p">,</span> <span class="n">g_xy</span><span class="p">,</span> <span class="n">g_xz</span><span class="p">,</span>
+        <span class="n">g_yt</span><span class="p">,</span> <span class="n">g_yx</span><span class="p">,</span> <span class="n">g_yy</span><span class="p">,</span> <span class="n">g_yz</span><span class="p">,</span>
+        <span class="n">g_zt</span><span class="p">,</span> <span class="n">g_zx</span><span class="p">,</span> <span class="n">g_zy</span><span class="p">,</span> <span class="n">g_zz</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The most simple example is for Minkowski:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">metric</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+             <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+             <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span>
+             <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A file containing only these lines would be a valid input for
+<code class="docutils literal notranslate"><span class="pre">generate_gray_metric</span></code>.</p>
+<p>If, like in most cases, the metric depends on the spacetime event, then the
+input file must import <code class="docutils literal notranslate"><span class="pre">sympy</span></code> and must define the symbols that it uses.
+For example,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">symbols</span>
+<span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s1">&#39;t, x, y, z&#39;</span><span class="p">,</span> <span class="n">real</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">metric</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">(</span><span class="o">-</span><span class="n">t</span> <span class="o">+</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="o">*</span><span class="n">z</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note, the input file can define any helper function it may need, and can
+introduce additional symbols. For instance:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">symbols</span>
+<span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s1">&#39;t, x, y, z&#39;</span><span class="p">,</span> <span class="n">real</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">real</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">za</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">z</span><span class="o">*</span><span class="n">a</span>
+
+<span class="k">def</span> <span class="nf">metric</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">(</span><span class="o">-</span><span class="n">t</span> <span class="o">+</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">za</span><span class="p">())</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">generate_gray_metric</span></code> is turn all the additional symbols in run-time
+adjustable arguments.</p>
+</div>
+<div class="section" id="the-concept-of-levels">
+<h3>The concept of <em>levels</em><a class="headerlink" href="#the-concept-of-levels" title="Permalink to this headline">¶</a></h3>
+<p>The geodesic equation can be written in multiple different ways. The <em>best</em> way
+to write the equation depends on the metric and on the hardware. For instance,
+in some cases the analytical expression is more expensive to compute than the
+numerical one. Or, when the metric is simple, it is possible to reduce
+symbolically the expressions. In <code class="docutils literal notranslate"><span class="pre">generate_gray_metric</span></code>, we implement many
+different possible choices that we call <em>levels</em>.</p>
+<p>Let us start from the levels 7, 8 and 9. In these levels, we deal directly with
+the Christoffel symbols.</p>
+<p>The most simple form of the geodesic equation is</p>
+<div class="math notranslate nohighlight" id="equation-geo-eq-chri">
+<span class="eqno">(1)<a class="headerlink" href="#equation-geo-eq-chri" title="Permalink to this equation">¶</a></span>\[\ddot{x}^\mu = -\Gamma^{\mu}_{\;\;\alpha\beta} \dot{x}^\alpha \dot{x}^\beta\,.\]</div>
+<p>Now, we have three choices. The first, is to compute symbolically the entire
+right-hand-side of <a class="reference internal" href="#equation-geo-eq-chri">(1)</a>. In this case, <code class="docutils literal notranslate"><span class="pre">generate_gray_metric</span></code>
+computes analytically the Christoffel symbols, and use them to compute the
+right-hand-side. Then, it turns the resulting expression into code. This is
+level 7. A second possibility is to still analytically the Christoffel symbols,
+but let GRay2 to compute numerically the dot products. This possibility is
+implemented in level 8, and consists in using the language of matrices, so that
+Equation <a class="reference internal" href="#equation-geo-eq-chri">(1)</a> reads</p>
+<div class="math notranslate nohighlight" id="equation-geo-eq-chri-max">
+<span class="eqno">(2)<a class="headerlink" href="#equation-geo-eq-chri-max" title="Permalink to this equation">¶</a></span>\[\ddot{x}^\mu = -\left(\vec{\Gamma}^{\mu} \vec{\dot{x}}\right) \cdot \vec{\dot{x}}\,.\]</div>
+<p>Finally, we can compute the derivatives analytically, and everything else
+numerically (the Christoffel symbols and the dot products), as done in level 9.
+Here, we use that the Christoffel symbols are</p>
+<div class="math notranslate nohighlight" id="equation-christoffel">
+<span class="eqno">(3)<a class="headerlink" href="#equation-christoffel" title="Permalink to this equation">¶</a></span>\[\Gamma^{\mu}_{\;\;\alpha\beta} = \frac{1}{2} g^{\mu\nu} \left(g_{\nu\alpha, \beta} + g_{\nu\beta, \alpha} - g_{\alpha\beta, \nu}\right)\,.\]</div>
+<p>The other levels are based on mathematical manipulations. With Equation
+<a class="reference internal" href="#equation-christoffel">(3)</a>, Equation <a class="reference internal" href="#equation-geo-eq-chri">(1)</a> can be written as</p>
+<div class="math notranslate nohighlight" id="equation-geo-eq-der">
+<span class="eqno">(4)<a class="headerlink" href="#equation-geo-eq-der" title="Permalink to this equation">¶</a></span>\[\ddot{x}^\mu = - \left(g^{\mu\beta} \dot{x}^\alpha - \frac{1}{2}g^{\mu\alpha} \dot{x}^\beta  \right) g_{\beta\gamma, \alpha} \dot{x}^\gamma \,.\]</div>
+<p>Defining</p>
+<div class="math notranslate nohighlight" id="equation-phi">
+<span class="eqno">(5)<a class="headerlink" href="#equation-phi" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{align}
+\Phi^\gamma_{\alpha \beta} &amp;= g_{\beta\gamma, \alpha} \\
+\Upsilon &amp;=  -\vec{\Phi}_{\gamma} \dot{x}^\gamma
+\end{align}\end{split}\]</div>
+<p>Then,</p>
+<div class="math notranslate nohighlight" id="equation-geo-eq-der-ups">
+<span class="eqno">(6)<a class="headerlink" href="#equation-geo-eq-der-ups" title="Permalink to this equation">¶</a></span>\[\ddot{x}^\mu =  g^{\mu\beta}\Upsilon_{\alpha\beta} \dot{x}^\alpha + \frac{1}{2}g^{\mu\alpha}\Upsilon_{\alpha\beta} \dot{x}^\beta  \,.\]</div>
+<p>Or</p>
+<div class="math notranslate nohighlight" id="equation-geo-eq-der-ups-comp">
+<span class="eqno">(7)<a class="headerlink" href="#equation-geo-eq-der-ups-comp" title="Permalink to this equation">¶</a></span>\[\ddot{x}^\mu =  g^{\mu\beta}(\Upsilon^T)_{\beta\alpha} \dot{x}^\alpha + \frac{1}{2}g^{\mu\alpha}\Upsilon_{\alpha\beta} \dot{x}^\beta  \,.\]</div>
+<p>In matrix notation</p>
+<div class="math notranslate nohighlight" id="equation-geo-eq-der-ups-mat">
+<span class="eqno">(8)<a class="headerlink" href="#equation-geo-eq-der-ups-mat" title="Permalink to this equation">¶</a></span>\[\ddot{\vec{x}} =  (\vec{g}^{-1}\vec{\Upsilon}^T) \cdot \dot{\vec{x}} + \frac{1}{2} (\vec{g}^{-1} \vec{\Upsilon}) \cdot \dot{\vec{x}}  \,.\]</div>
+<p>Defining</p>
+<div class="math notranslate nohighlight" id="equation-xi">
+<span class="eqno">(9)<a class="headerlink" href="#equation-xi" title="Permalink to this equation">¶</a></span>\[\vec{\Xi} = \vec{\Upsilon}^T + \frac{1}{2} \vec{\Upsilon}\]</div>
+<p>and</p>
+<div class="math notranslate nohighlight" id="equation-lambda">
+<span class="eqno">(10)<a class="headerlink" href="#equation-lambda" title="Permalink to this equation">¶</a></span>\[\vec{\Lambda} = \vec{g}^{-1} \cdot \vec{\Xi}\]</div>
+<p>The geodesic equation is simply</p>
+<div class="math notranslate nohighlight" id="equation-geo-eq-lambda">
+<span class="eqno">(11)<a class="headerlink" href="#equation-geo-eq-lambda" title="Permalink to this equation">¶</a></span>\[\ddot{\vec{x}} =  \vec{\Lambda} \dot{\vec{x}} \,.\]</div>
+<p>Levels 1-6 follow this derivation implementing part analytical and part
+numerical computation. Increasing the level means that more and more
+calculations are done numerically. Level 1 follows the entire derivation until
+the end analytically, and provide a symbolical right-hand-side. Level 2 computes
+<span class="math notranslate nohighlight">\(\Lambda\)</span> analytically, and leave the final dot product to be computed
+numerically. Level 3 is up to <span class="math notranslate nohighlight">\(\Xi\)</span>, and the geodesic equation is computed numerically as</p>
+<div class="math notranslate nohighlight" id="equation-geo-xi">
+<span class="eqno">(12)<a class="headerlink" href="#equation-geo-xi" title="Permalink to this equation">¶</a></span>\[\ddot{\vec{x}} = \vec{g}^{-1} \cdot \vec{\Xi} \cdot \dot{\vec{x}} \,.\]</div>
+<p>At level 4, also <span class="math notranslate nohighlight">\(\Xi\)</span> is computed numerically, with up <span class="math notranslate nohighlight">\(\Upsilon\)</span>
+analytical. Level 5, <span class="math notranslate nohighlight">\(\Upsilon\)</span> is computed numerically from an analytical
+<span class="math notranslate nohighlight">\(\Phi\)</span>, and finally at Level 6, even <span class="math notranslate nohighlight">\(\Phi\)</span> is computed numerically.</p>
+</div>
+<div class="section" id="what-level-should-i-choose">
+<h3>What level should I choose?<a class="headerlink" href="#what-level-should-i-choose" title="Permalink to this headline">¶</a></h3>
+<p>If you have a very simple metric, choose levels with more analytical
+computations. You could even add some <code class="docutils literal notranslate"><span class="pre">simplify</span></code> function calls in the code.
+This, in general, increases the code generation time by several orders of
+magnitude, and has benefits only if the metric is simple. In case you have
+massively parallel devices, it is typically better to do more numerical
+calculations.</p>
+<p>Our suggestion is to try them all and find the fastest for the specific case in
+consideration.</p>
+</div>
+<div class="section" id="command-line-arguments">
+<h3>Command-line arguments<a class="headerlink" href="#command-line-arguments" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">generate_gray_metric</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span> <span class="o">-</span><span class="n">i</span> <span class="n">INPUT_FILE</span> <span class="p">[</span><span class="o">--</span><span class="n">level</span> <span class="mi">1</span><span class="o">-</span><span class="mi">9</span><span class="p">]</span>
+                            <span class="p">[</span><span class="o">--</span><span class="n">ks</span><span class="o">-</span><span class="n">test</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="section" id="Named Arguments">
+<h4>Named Arguments<a class="headerlink" href="#Named Arguments" title="Permalink to this headline">¶</a></h4>
+<dl class="option-list">
+<dt><kbd>-o, --output-file</kbd></dt>
+<dd><p>Name of the file where write the output.                     If the file does not exist, it will be created.                     If the file exists, it will be overwritten</p>
+</dd>
+<dt><kbd>-i, --input-file</kbd></dt>
+<dd><p>Name of the file where to read the metric.                     The file has to be a valid Python3 file with                     a function metric(). See description of generate_gray_metric</p>
+</dd>
+<dt><kbd>--level</kbd></dt>
+<dd><p>Possible choices: 1, 2, 3, 4, 5, 6, 7, 8, 9</p>
+<p>What level to use?                           1: Compute directly the RHS                           2: Compute Lambda                            3: Compute Xi                           4: Compute Upsilon                           5: Compute Phi                           6: Compute simplified Phi                           7: Compute Christoffel symbols, reduce to RHS                           8: Compute Christoffel symbols                           9: Compute simplified Christoffel symbols                          (default: 1)</p>
+<p>Default: 1</p>
+</dd>
+<dt><kbd>--ks-test</kbd></dt>
+<dd><p>Add comparison with hard-coded Kerr-Schild</p>
+<p>Default: False</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="index.html" title="Overview"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">GRay-python 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Gabriele Bozzola.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>
