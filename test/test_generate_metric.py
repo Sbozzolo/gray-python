@@ -177,7 +177,7 @@ class TestGenerateMetric(unittest.TestCase):
         for level in range(1, tot_number_of_levels + 1):
             level_out[level] = read_text('gray.etc', f'ks_level{level}.cl')
             with self.subTest(level=level):
-                self.assertEqual(generate_metric.generate_geodesic_clcode(self.g_ks_deriv,
-                                                                          self.g_ksUP,
-                                                                          self.uUP, level),
-                                 level_out[level])
+                self.assertMultiLineEqual(generate_metric.generate_geodesic_clcode(self.g_ks_deriv,
+                                                                                   self.g_ksUP,
+                                                                                   self.uUP, level),
+                                          level_out[level])

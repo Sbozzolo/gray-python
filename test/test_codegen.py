@@ -53,14 +53,9 @@ class TestCodegen(unittest.TestCase):
 
         with unittest.mock.patch('sys.stdout', new=StringIO()) as gray_code:
             expected_output = """\
-Additional code in conf.c. Add after comment ADDITIONAL CODE
-PARA(a, a) = atof(val);\n
+Additional code in param.opts:
+double a:a = strtod(val, &rem);
 
-Additional code in gray.c. Add after comment ADDITIONAL CODE
-gray->a = 0;\n
-
-Additional code in gray.h. Add after comment ADDITIONAL CODE
-double a;\n
 """
             self.assertTrue(
                 codegen.check_for_new_symbols_and_print_gray_code(
